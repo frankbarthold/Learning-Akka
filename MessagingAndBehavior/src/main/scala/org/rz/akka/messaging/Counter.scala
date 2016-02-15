@@ -6,6 +6,7 @@ import akka.actor.Actor
   * Object companion for Counter actor.
   */
 object Counter {
+  val actorName = "Counter-Actor"
   sealed trait CounterMessage
   case class Incr(x: Int) extends CounterMessage
   case class Decr(x: Int) extends CounterMessage
