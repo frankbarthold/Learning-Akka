@@ -73,7 +73,7 @@ class UserStorage extends Actor with Stash {
       unstashAll() // Retrieve all stashed Operation messages
       context.become(connected)
     case operation: Operation =>
-      stash() // Send operation messages to stashing messages mailbox.
+      stash() // Send operation messages to stashed messages mailbox.
     case _ => println("Unknown message")
   }
 

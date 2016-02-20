@@ -27,3 +27,26 @@ object UserStorageApp extends App {
   system.terminate()
 
 }
+
+/**
+  * Runnable object for testing behavior management with Finite State Machine.
+  */
+object UserStorageFSMApp extends App {
+
+  val system = ActorSystem("Actor-System-Behavior-FSM")
+  val userStorage = system.actorOf(Props[UserStorageFSM], "User-Storage-Actor-FSM")
+
+//    userStorage ! Connect
+//    userStorage ! Operation(Create, Some(User("Pepe", "pepe@nowhere.com")))
+//    userStorage ! Disconnect
+
+  // This operation message will be stashed for beign processed when the actor
+  // reached the Connected stat
+   userStorage ! Operation(Create, Some(User("Pepe", "pepe@nowhere.com")))
+   userStorage ! Connect
+   userStorage ! Disconnect
+
+  Thread.sleep(1000)
+  system.terminate()
+
+}
