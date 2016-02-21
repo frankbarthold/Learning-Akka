@@ -1,10 +1,11 @@
 package org.rz.akka.persistence.accounting
 
+import akka.actor.ActorLogging
 import akka.persistence.fsm.PersistentFSM
 import akka.persistence.fsm.PersistentFSM.FSMState
 import org.rz.akka.persistence.accounting.Account._
 
-import scala.reflect.ClassTag
+import scala.reflect._
 
 /**
   * Companion object for account actor.
@@ -46,9 +47,8 @@ object Account {
 /**
   * Account management actor.
   */
-class Account extends PersistentFSM[State, Data, DomainEvent] {
+class Account extends PersistentFSM[State, Data, DomainEvent] with ActorLogging{
   import Account._
-  import scala.reflect.classTag
 
   override implicit def domainEventClassTag: ClassTag[DomainEvent] = classTag[DomainEvent]
 
@@ -57,7 +57,7 @@ class Account extends PersistentFSM[State, Data, DomainEvent] {
   override def applyEvent(domainEvent: DomainEvent, currentData: Data): Data = {
     domainEvent match {
       case AcceptedTransaction(amount, Credit) =>
-        val newBalance = amount + currentData.amount
+        val newBalance = currentData.amount + amount
         println(s"[ACCOUNT] The credit transaction was accepted (new balance is $newBalance)")
         Balance(newBalance)
 
