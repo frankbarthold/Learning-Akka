@@ -1,7 +1,7 @@
 package org.rz.akka.persistence.counting
 
 import akka.actor.ActorLogging
-import akka.persistence.{SnapshotOffer, PersistentActor}
+import akka.persistence._
 import org.rz.akka.persistence.counting.Counter._
 
 /**
@@ -16,7 +16,7 @@ object Counter {
   case class Increment(override val count: Int) extends Operation
   case class Decrement(override val count: Int) extends Operation
 
-  // Command & Event persistency
+  // Command & Event persistence
   case class Cmd(op: Operation)
   case class Evt(op: Operation)
 
@@ -26,6 +26,9 @@ object Counter {
 
 /**
   * Counter persistent actor.
+  *
+  *  -> Command: Issue an order for something to happen.
+  *  -> Event: Hey! A command was received, something happend.
   */
 class Counter extends PersistentActor with ActorLogging {
 
@@ -37,9 +40,12 @@ class Counter extends PersistentActor with ActorLogging {
 
   // Update the internal state
   def updateState(evt: Evt) = evt match {
-    case Evt(Increment(count)) =>
-      state = State(count + state.count)
-    case Evt(Decrement(count)) => state = State(count - state.count)
+    case Evt(Increment(value)) =>
+      state = State(value + state.count)
+      takeSnapshot()
+    case Evt(Decrement(value)) =>
+      state = State(state.count - value)
+      takeSnapshot()
     case _ => println("[COUNTER] Unknown state message received")
   }
 
@@ -48,20 +54,41 @@ class Counter extends PersistentActor with ActorLogging {
     case evt: Evt =>
       println(s"[COUNTER] Received recover event with counter $evt")
       updateState(evt)
+
     case SnapshotOffer(_, snapshot: State) =>
       println(s"[COUNTER] Received recover event from snapshot with counter $snapshot")
       state = snapshot
+
+    case RecoveryCompleted =>
+      println("[COUNTER] Recovery has been completed")
+
+    case SaveSnapshotSuccess(metadata) =>
+      println("[COUNTER] Recovery has been completed from a snapshot")
+
+    case SaveSnapshotFailure(metadata, ex: Throwable) =>
+      println(s"[COUNTER] Recovery from a snapshot has failed due to $ex")
   }
 
-  // Checks if command can be applied on current state
+  // Normal receive.
   override def receiveCommand: Receive = {
     case cmd @ Cmd(op) =>
       println(s"[COUNTER] Received command with counter $op")
       persist(Evt(op)) {
-        evt => updateState(evt)
+        evt =>
+          updateState(evt)
       }
+
     case "print" =>
       println(s"[COUNTER] Current state is $state")
   }
+
+  // Take a snapshot every time the counter is odd.
+  def takeSnapshot() {
+    if(state.count % 2 != 0)
+      saveSnapshot(state)
+  }
+
+  // Disable recovery
+  // override def recovery = Recovery.none
 
 }
