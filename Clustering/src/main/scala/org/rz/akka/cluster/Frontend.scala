@@ -11,13 +11,15 @@ object Frontend {
 
   private var frontend: ActorRef = _
 
+  val name = "Frontend-Actor"
+
   /**
     * Initiates the frontend node system.
     */
   def initiate(): Unit ={
     val config = ConfigFactory.load.getConfig("FrontendNode")
-    val system = ActorSystem("Cluster-System", config)
-    frontend = system.actorOf(Props[Backend], "Frontend-Actor")
+    val system = ActorSystem("ClusterSystem", config)
+    frontend = system.actorOf(Props[Frontend], name)
   }
 
   def getFrontend = frontend
@@ -26,16 +28,16 @@ object Frontend {
 /**
   * Frontend actor.
   */
-class Frontend extends Actor{
+class Frontend extends Actor {
 
   var backends = IndexedSeq.empty[ActorRef]
 
   override def receive = {
     case Add if backends.isEmpty =>
       println("[FRONTEND] No backend available for cluster")
-    case op: Add =>
+    case op @ Add =>
       val chosenBackend: Int = util.Random.nextInt(backends.size)
-      println(s"[FRONTEND] Add operation received, sending to random cluster #$chosenBackend")
+      println(s"[FRONTEND] Add operation received, sending to random backend #$chosenBackend")
       backends(chosenBackend) forward op
     case BackendRegistration if !backends.contains(sender()) =>
       backends = backends :+ sender()

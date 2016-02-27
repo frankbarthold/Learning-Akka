@@ -22,23 +22,25 @@ object Backend {
     */
   def initiate(port: Int): Unit ={
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port").withFallback(ConfigFactory.load.getConfig("BackendNode"))
-    val system = ActorSystem("Cluster-System", config)
-    val backend = system.actorOf(Props[Backend], "Backend-Actor")
+    val system = ActorSystem("ClusterSystem", config)
+    system.actorOf(Props[Backend], "Backend-Actor")
   }
 }
 
 /**
   * Actor that will run at the backend node.
   */
-class Backend extends Actor{
+class Backend extends Actor {
 
   val cluster = Cluster(context.system)
 
   override def receive = {
     case Add => println(s"[BACKEND] Member $self was added")
     case MemberUp(member) =>
-      if(member.hasRole("frontend"))
-        context.actorSelection(RootActorPath(member.address) / "user" / "frontend" ) ! BackendRegistration
+      if(member.hasRole("frontend")) {
+        println(s"[BACKEND] Actor with role 'frontend' is up (${sender()})")
+        context.actorSelection(RootActorPath(member.address) / "user" / Frontend.name) ! BackendRegistration
+      }
     case default => println(s"[BACKEND] Unknown command $default")
   }
 

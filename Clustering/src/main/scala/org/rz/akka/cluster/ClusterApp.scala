@@ -11,9 +11,9 @@ object ClusterApp extends App{
 
   Backend.initiate(2552)
 
-  Backend.initiate(2562)
+  Backend.initiate(2553)
 
-  Backend.initiate(2572)
+  Backend.initiate(2554)
 
   Thread.sleep(10000)
 
