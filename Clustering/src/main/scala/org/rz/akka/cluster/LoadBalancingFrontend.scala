@@ -1,9 +1,13 @@
 package org.rz.akka.cluster
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.FromConfig
 import com.typesafe.config.ConfigFactory
-import org.rz.akka.cluster.Backend.Add
+import org.rz.akka.cluster.LoadBalancingBackend.Add
+
+import scala.concurrent.duration.FiniteDuration
 
 
 /**
@@ -20,7 +24,7 @@ object LoadBalancingFrontend {
     */
   def initiate(): Unit ={
     val config = ConfigFactory.parseString("akka.cluster.roles=[frontend]").withFallback(ConfigFactory.load("loadbalancer"))
-    val system = ActorSystem("ClusterSystem", config)
+    val system = ActorSystem("RemoteLoadBalancedSystem", config)
     frontend = system.actorOf(Props[LoadBalancingFrontend], name = name)
   }
 
@@ -33,12 +37,15 @@ object LoadBalancingFrontend {
   */
 class LoadBalancingFrontend extends Actor{
 
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   val backend = context.actorOf(FromConfig.props(), name = LoadBalancingBackend.name)
+  context.system.scheduler.schedule(FiniteDuration(10, TimeUnit.SECONDS), FiniteDuration(10, TimeUnit.SECONDS), self, Add)
 
   override def receive = {
     case op @ Add =>
-      println(s"[FRONTEND] Add operation received, sending to backend (with load balancing)")
+      println(s"[FRONTEND] Add operation received, sending to backend $backend")
       backend forward op
-    case _ => println("[FRONTEND] Unknown command")
+    case default => println(s"[FRONTEND] Unknown command $default")
   }
 }

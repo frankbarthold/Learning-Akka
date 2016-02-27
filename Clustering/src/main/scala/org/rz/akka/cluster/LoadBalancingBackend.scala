@@ -24,7 +24,7 @@ object LoadBalancingBackend {
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
         .withFallback(ConfigFactory.parseString("akka.cluster.roles=[backend]"))
         .withFallback(ConfigFactory.load("loadbalancer"))
-    val system = ActorSystem("ClusterSystem", config)
+    val system = ActorSystem("RemoteLoadBalancedSystem", config)
     system.actorOf(Props[LoadBalancingBackend], name = name)
   }
 }
@@ -35,7 +35,7 @@ object LoadBalancingBackend {
 class LoadBalancingBackend extends Actor {
 
   override def receive = {
-    case Add => println(s"[BACKEND] Member ${sender()} was added")
+    case Add => println(s"[BACKEND] Frontend ${sender()} pinged us!")
     case default => println(s"[BACKEND] Unknown command $default")
   }
 
