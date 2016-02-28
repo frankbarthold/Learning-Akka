@@ -1,8 +1,8 @@
-package org.rz.akka.cluster
+package org.rz.akka.cluster.loadbalanced
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
-import org.rz.akka.cluster.LoadBalancingBackend.Add
+import org.rz.akka.cluster.loadbalanced.LoadBalancingBackend.Add
 
 /**
   * Companion object for Load Balancing Backend actor.

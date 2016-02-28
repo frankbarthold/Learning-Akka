@@ -1,11 +1,11 @@
-package org.rz.akka.cluster
+package org.rz.akka.cluster.loadbalanced
 
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.FromConfig
 import com.typesafe.config.ConfigFactory
-import org.rz.akka.cluster.LoadBalancingBackend.Add
+import org.rz.akka.cluster.loadbalanced.LoadBalancingBackend.Add
 
 import scala.concurrent.duration.FiniteDuration
 

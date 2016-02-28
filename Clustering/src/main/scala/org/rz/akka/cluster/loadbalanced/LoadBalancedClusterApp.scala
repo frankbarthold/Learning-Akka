@@ -1,4 +1,4 @@
-package org.rz.akka.cluster
+package org.rz.akka.cluster.loadbalanced
 
 /**
   * Runnable app for testing a load balanced cluster.
