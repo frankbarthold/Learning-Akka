@@ -19,6 +19,10 @@ object Frontend {
 
 }
 
+/**
+  * Frontend actor that handles messages and forwards them
+  * to the singleton master actor.
+  */
 class Frontend extends Actor {
 
   import scala.concurrent.ExecutionContext.Implicits.global

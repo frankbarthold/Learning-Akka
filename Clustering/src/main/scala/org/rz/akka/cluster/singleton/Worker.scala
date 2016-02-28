@@ -18,7 +18,7 @@ object Worker {
 }
 
 /**
-  * Worker actor.
+  * Worker actor that performs the final computation (just printing a message).
   */
 class Worker extends Actor {
 

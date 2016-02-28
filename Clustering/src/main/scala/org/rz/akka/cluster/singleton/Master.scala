@@ -33,7 +33,7 @@ object Master {
 }
 
 /**
-  * Master actor.
+  * Master singleton persistent actor that plays the backend role.
   */
 class Master extends PersistentActor with ActorLogging {
 
